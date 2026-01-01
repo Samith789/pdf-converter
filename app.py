@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template
+from flask import Flask, request, send_file
 from flask_cors import CORS
 from pdf2docx import Converter
 import os
@@ -23,18 +23,17 @@ def convert_pdf():
     docx_path = os.path.join(UPLOAD_FOLDER, docx_filename)
     file.save(pdf_path)
 
-    # --- ADVANCED SETTINGS FOR BETTER LAYOUT ---
+    # --- HIGH ACCURACY SETTINGS ---
     settings = {
-        'connected_border_tolerance': 0.3,   # Keeps logos separate
-        'float_image_ignorable_gap': 2.0,    # Prevents images from merging
-        'line_margin': 0.1,                  # Better underline detection
-        'shape_min_dimension': 0.1,          # Better bullet point detection
-        'ocr': False                         
+        'ocr': True,                         # Enables OCR to "see" bullets and logos
+        'connected_border_tolerance': 0.1,   # Very strict separation for RCRC/Parsons logos
+        'float_image_ignorable_gap': 1.0,    # Forces images to stay separate
+        'line_margin': 0.1,                  # Detects thin underlines
     }
 
     try:
         cv = Converter(pdf_path)
-        # We use the settings here to solve your logo/bullet issues
+        # This uses the high-accuracy engine
         cv.convert(docx_path, start=0, end=None, **settings) 
         cv.close()
         return send_file(docx_path, as_attachment=True)
