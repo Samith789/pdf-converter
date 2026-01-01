@@ -4,6 +4,7 @@ from pdf2docx import Converter
 import os
 
 app = Flask(__name__)
+# CORS allows your GitHub website to talk to this Render server
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
@@ -11,7 +12,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
-    return "Backend is Live and Ready!"
+    return "Backend is Live and Ready on Port 10000!"
 
 @app.route('/convert', methods=['POST'])
 def convert_pdf():
@@ -24,13 +25,13 @@ def convert_pdf():
     docx_path = os.path.join(UPLOAD_FOLDER, docx_filename)
     file.save(pdf_path)
 
-    # These settings fix the RCRC/Parsons logos and the bullet points
+    # --- SETTINGS TO FIX LOGOS AND BULLETS ---
     settings = {
-        'ocr': True,                         # High accuracy mode
-        'connected_border_tolerance': 0.1,   # Keeps logos separate
+        'ocr': True,                         # High accuracy mode for logos
+        'connected_border_tolerance': 0.1,   # Keeps RCRC/Parsons logos separate
         'float_image_ignorable_gap': 1.0,    # Prevents banner merging
         'line_margin': 0.1,                  # Detects underlines
-        'shape_min_dimension': 0.1           # Finds bullet points
+        'shape_min_dimension': 0.1           # Finds small bullet points
     }
 
     try:
@@ -45,5 +46,5 @@ def convert_pdf():
             os.remove(pdf_path)
 
 if __name__ == '__main__':
-    # Render requires host 0.0.0.0 and port 10000
+    # Render MUST have host 0.0.0.0 and port 10000
     app.run(host='0.0.0.0', port=10000)
