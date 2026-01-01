@@ -21,15 +21,25 @@ def convert_pdf():
     pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
     docx_filename = file.filename.replace('.pdf', '.docx')
     docx_path = os.path.join(UPLOAD_FOLDER, docx_filename)
-
     file.save(pdf_path)
 
-    # Core conversion logic
-    cv = Converter(pdf_path)
-    cv.convert(docx_path, start=0, end=None)
-    cv.close()
+    # --- ADVANCED SETTINGS FOR BETTER LAYOUT ---
+    settings = {
+        'connected_border_tolerance': 0.3,   # Keeps logos separate
+        'float_image_ignorable_gap': 2.0,    # Prevents images from merging
+        'line_margin': 0.1,                  # Better underline detection
+        'shape_min_dimension': 0.1,          # Better bullet point detection
+        'ocr': False                         
+    }
 
-    return send_file(docx_path, as_attachment=True)
+    try:
+        cv = Converter(pdf_path)
+        # We use the settings here to solve your logo/bullet issues
+        cv.convert(docx_path, start=0, end=None, **settings) 
+        cv.close()
+        return send_file(docx_path, as_attachment=True)
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
