@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Free PDF to Word Converter</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f4f4f9; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        input { margin: 20px 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #status { margin-top: 15px; font-size: 0.9rem; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>PDF to Word</h2>
+        <p>Convert your PDF files for free</p>
+        <input type="file" id="pdfInput" accept=".pdf">
+        <br>
+        <button onclick="uploadFile()" id="convertBtn">Convert Now</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('pdfInput');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('convertBtn');
+
+            if (!fileInput.files[0]) return alert("Please select a file");
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            status.innerText = "Converting... please wait.";
+            btn.disabled = true;
+
+            try {
+                // Replace URL with your deployed backend URL later
+                const response = await fetch('http://127.0.0.1:5000/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileInput.files[0].name.replace('.pdf', '.docx');
+                    document.body.appendChild(a);
+                    a.click();
+                    status.innerText = "Conversion Successful!";
+                } else {
+                    status.innerText = "Conversion failed.";
+                }
+            } catch (err) {
+                status.innerText = "Error connecting to server.";
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
